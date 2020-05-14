@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	_ "github.com/Group5-HCMUS/hasagi/config"
@@ -10,6 +9,7 @@ import (
 	"github.com/Group5-HCMUS/hasagi/pkg/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/spf13/viper"
 )
 
@@ -39,6 +39,5 @@ func main() {
 		port = viper.GetString("port")
 	}
 
-	log.Println("service running on port: ", port)
 	_ = router.Run(":" + port)
 }

@@ -3,6 +3,10 @@ package service
 import (
 	"net/http"
 
+	"github.com/Group5-HCMUS/hasagi/pkg/authservice"
+	"github.com/Group5-HCMUS/hasagi/pkg/middleware"
+
+	"github.com/Group5-HCMUS/hasagi/pkg/model"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 )
@@ -16,13 +20,19 @@ func NewService(repo Repository) *service {
 }
 
 func (s *service) Register(g gin.IRouter) {
-	g.POST("/alert-location/:userID")
+	// child role
+	child := g.Use(middleware.Role(authservice.Child))
+
+	// parent role
+	parent := g.Use(middleware.Role(authservice.Parent))
+	parent.POST("/alert-location/:userID")
+
 }
 
 func (s *service) postAlertLocation(c *gin.Context) {
 	userIDStr := c.Param("userID")
 	if userIDStr == "" {
-		c.JSON(http.StatusBadRequest, HttpResponse{
+		c.JSON(http.StatusBadRequest, model.HttpResponse{
 			Message: "user id is nil",
 		})
 		c.Abort()
@@ -31,7 +41,7 @@ func (s *service) postAlertLocation(c *gin.Context) {
 
 	userID, err := cast.ToUintE(userIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, HttpResponse{
+		c.JSON(http.StatusBadRequest, model.HttpResponse{
 			Message: "user id is not a number",
 		})
 		c.Abort()
@@ -41,7 +51,7 @@ func (s *service) postAlertLocation(c *gin.Context) {
 	req := CreateAlertLocationRequest{}
 	err = c.BindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, HttpResponse{
+		c.JSON(http.StatusBadRequest, model.HttpResponse{
 			Message: "invalid data",
 		})
 		c.Abort()
@@ -50,14 +60,14 @@ func (s *service) postAlertLocation(c *gin.Context) {
 
 	err = s.repo.CreateAlertLocation(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, HttpResponse{
+		c.JSON(http.StatusInternalServerError, model.HttpResponse{
 			Message: err.Error(),
 		})
 		c.Abort()
 		return
 	}
 
-	c.JSON(http.StatusCreated, HttpResponse{
+	c.JSON(http.StatusCreated, model.HttpResponse{
 		Message: "create alert location successfully",
 	})
 }

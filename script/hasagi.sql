@@ -1,4 +1,5 @@
-CREATE DATABASE `hasagi`;
+-- CREATE DATABASE `hasagi`;
+USE `hasagi`;
 
 DROP TABLE IF EXISTS `location_histories`;
 DROP TABLE IF EXISTS `alert_locations`;
