@@ -16,7 +16,7 @@ dev:
 pro:
   database:
     dialect: mysql
-    url: root:root@tcp(localhost:3306)/hasagi?charset=utf8&parseTime=True&loc=Local
+    url: xbcokztxb1pt3yg1:l3jjsnqopzqge00p@tcp(i5x1cqhq5xbqtv00.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306)/kbqbn30ryz0u0w81?charset=utf8&parseTime=True&loc=Local
 
   auth:
     url: https://dacnpm-group05.herokuapp.com/api/client/v1/me
