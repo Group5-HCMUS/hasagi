@@ -12,8 +12,9 @@ import (
 )
 
 type Repository interface {
-	CreateAlertLocation(userID uint,
-		createAlertLocationRequest CreateAlertLocationRequest) error
+	CreateAlertLocation(createAlertLocationRequest CreateAlertLocationRequest) error
+	CreateLocationHistoryAndAlert(alertToUserID uint,
+		createLocationHistoryRequest CreateLocationHistoryRequest) error
 }
 
 type repository struct {
@@ -24,25 +25,25 @@ type repository struct {
 	lcHistoryRepo    lchistoryrepo.Repository
 }
 
-func (r *repository) CreateAlertLocation(userID uint,
+func (r *repository) CreateAlertLocation(
 	createAlertLocationRequest CreateAlertLocationRequest) error {
 	alLocation := allocationrepo.AlertLocation{
 		Longitude: createAlertLocationRequest.Longitude,
 		Name:      createAlertLocationRequest.Name,
 		Latitude:  createAlertLocationRequest.Latitude,
-		UserID:    userID,
+		UserID:    createAlertLocationRequest.UserID,
 	}
 
 	return r.alLocationRepo.Create(&alLocation)
 }
 
-func (r *repository) CreateLocationHistoryAndAlert(userID uint,
+func (r *repository) CreateLocationHistoryAndAlert(alertToUserID uint,
 	createLocationHistoryRequest CreateLocationHistoryRequest) error {
 	lcHistory := lchistoryrepo.LocationHistory{
 		Name:      createLocationHistoryRequest.Name,
 		Longitude: createLocationHistoryRequest.Longitude,
 		Latitude:  createLocationHistoryRequest.Latitude,
-		UserID:    userID,
+		UserID:    createLocationHistoryRequest.UserID,
 		Timestamp: createLocationHistoryRequest.Timestamp,
 	}
 
@@ -52,8 +53,8 @@ func (r *repository) CreateLocationHistoryAndAlert(userID uint,
 		return err
 	}
 
-	return r.alert(lcHistory.Timestamp, userID, lcHistory.Latitude,
-		lcHistory.Longitude)
+	return r.alert(lcHistory.Timestamp, lcHistory.UserID, alertToUserID,
+		lcHistory.Latitude, lcHistory.Longitude)
 }
 
 func NewRepository(
@@ -70,8 +71,8 @@ func NewRepository(
 	}
 }
 
-func (r *repository) alert(timestamp time.Time, userID uint, latitude,
-	longitude float64) error {
+func (r *repository) alert(timestamp time.Time, userID, alertToUserID uint,
+	latitude, longitude float64) error {
 	tFromNow := time.Now().Sub(timestamp)
 	if tFromNow > r.maxTimeAlert {
 		logrus.Info("timestamp sub now (minutes): ", tFromNow.Minutes())
@@ -89,10 +90,11 @@ func (r *repository) alert(timestamp time.Time, userID uint, latitude,
 			latitude, longitude)
 		if distance <= r.maxDistanceAlert {
 			msg := fmt.Sprintf("Your child has arrived %s", alLocation.Name)
-			err = r.alertService.Alert(msg)
+			err = r.alertService.Alert(msg, alertToUserID)
 			if err != nil {
 				logrus.Errorf("failed to alert message: %s, error: %v", msg,
 					err)
+				return err
 			}
 		}
 	}

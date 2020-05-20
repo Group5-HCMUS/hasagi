@@ -1,12 +1,27 @@
+dev:
+  port: 8080
 
-port: 8080
+  database:
+    dialect: mysql
+    url: root:root@tcp(localhost:3306)/hasagi?charset=utf8&parseTime=True&loc=Local
 
-database:
-  dialect: mysql
-  url: root:root@tcp(localhost:3306)/hasagi?charset=utf8&parseTime=True&loc=Local
+  auth:
+    url: https://dacnpm-group05.herokuapp.com/api/client/v1/me
 
-auth:
-  url: https://dacnpm-group05.herokuapp.com/api/client/v1/me
+  alert:
+    url: hihi
+    max_distance: 100
+    max_time: 10 #minutes
 
-alert:
-  url:
+pro:
+  database:
+    dialect: mysql
+    url: root:root@tcp(localhost:3306)/hasagi?charset=utf8&parseTime=True&loc=Local
+
+  auth:
+    url: https://dacnpm-group05.herokuapp.com/api/client/v1/me
+
+  alert:
+    url: hihi
+    max_distance: 100
+    max_time: 10 #minutes

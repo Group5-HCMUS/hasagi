@@ -1,16 +1,16 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/Group5-HCMUS/hasagi/pkg/model"
-
 	"github.com/Group5-HCMUS/hasagi/pkg/authservice"
+	"github.com/Group5-HCMUS/hasagi/pkg/model"
 	"github.com/gin-gonic/gin"
 )
 
-const userKey = "user"
+const UserKey = "user"
 
 func VerifyToken(authService authservice.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -25,28 +25,18 @@ func VerifyToken(authService authservice.Service) gin.HandlerFunc {
 			return
 		}
 
-		c.Set(userKey, user)
+		c.Set(UserKey, user)
 		c.Next()
 	}
 }
 
 func Role(role authservice.UserRole) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		u, ok := c.Get(userKey)
-		if !ok {
-			c.JSON(http.StatusInternalServerError, model.HttpResponse{
-				Message: "cannot get user info",
+		user, err := GetUser(c)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, model.HttpResponse{
+				Message: err.Error(),
 			})
-			c.Abort()
-			return
-		}
-
-		user, ok := u.(authservice.User)
-		if !ok {
-			c.JSON(http.StatusInternalServerError, model.HttpResponse{
-				Message: "cannot get parse user info",
-			})
-			c.Abort()
 			return
 		}
 
@@ -60,6 +50,22 @@ func Role(role authservice.UserRole) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func GetUser(c *gin.Context) (user authservice.User, err error) {
+	u, ok := c.Get(UserKey)
+	if !ok {
+		err = errors.New("cannot get user info")
+		return
+	}
+
+	user, ok = u.(authservice.User)
+	if !ok {
+		err = errors.New("cannot get parse user info")
+		return
+	}
+
+	return
 }
 
 func trimToken(strToken string) string {

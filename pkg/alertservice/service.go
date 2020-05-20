@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	Alert(message string) error
+	Alert(message string, uid uint) error
 }
 
 type service struct {
@@ -15,7 +15,7 @@ type service struct {
 	client   httpclient.Client
 }
 
-func (s *service) Alert(message string) error {
+func (s *service) Alert(message string, uid uint) error {
 	log.Println("alert message: ", message)
 	return nil
 }
