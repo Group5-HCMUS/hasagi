@@ -21,11 +21,12 @@
 - [x] Update location kèm thông báo đến `parent` nếu đó là alert location
 
 ## API
-Root: `https://hasagi1998.herokuapp.com/api/v1/`
+Root: `https://hasagi1998.herokuapp.com/api/v1`
 
-### Tạo alert cho child
+### Tạo alert location cho child
 
 Method: POST
+Path: `/location/alert`
 1. Header
 
 |key|Type|Sample value
