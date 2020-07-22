@@ -4,6 +4,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/Group5-HCMUS/hasagi/pkg/alertservice"
+
 	_ "github.com/Group5-HCMUS/hasagi/config"
 	"github.com/Group5-HCMUS/hasagi/pkg/allocationrepo"
 	"github.com/Group5-HCMUS/hasagi/pkg/authservice"
@@ -42,11 +44,15 @@ func main() {
 	// service
 	httpClient := httpclient.NewClient()
 	authURL := viper.GetString("auth.url")
-	authService := authservice.New(authURL, httpClient)
 	maxDistance := viper.GetFloat64("alert.max_distance")
 	maxTime := viper.GetInt64("alert.max_time")
-	serviceRepo := service.NewRepository(maxDistance, time.Minute*time.Duration(maxTime),
-		aLocationRepo, lcHistoryRepo)
+	alertURL := viper.GetString("alert.url")
+
+	alertService := alertservice.New(alertURL, httpClient)
+	authService := authservice.New(authURL, httpClient)
+	serviceRepo := service.NewRepository(maxDistance,
+		time.Minute*time.Duration(maxTime), aLocationRepo,
+		lcHistoryRepo, alertService)
 	sv := service.NewService(serviceRepo)
 	authMiddleWare := middleware.VerifyToken(authService)
 	sv.Register(router.Group("/api/v1", authMiddleWare))

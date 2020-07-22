@@ -15,6 +15,7 @@ type Repository interface {
 	CreateAlertLocation(createAlertLocationRequest CreateAlertLocationRequest) error
 	CreateLocationHistoryAndAlert(alertToUserID uint,
 		createLocationHistoryRequest CreateLocationHistoryRequest) error
+	GetListAlertLocation(userID uint) ([]allocationrepo.AlertLocation, error)
 }
 
 type repository struct {
@@ -57,8 +58,9 @@ func (r *repository) CreateLocationHistoryAndAlert(alertToUserID uint,
 		lcHistory.Latitude, lcHistory.Longitude)
 }
 
-func (r *repository) getListAlertLocation(parentID, childID uint) ([]allocationrepo.AlertLocation, error) {
-	return nil, nil
+func (r *repository) GetListAlertLocation(userID uint) (
+	[]allocationrepo.AlertLocation, error) {
+	return r.alLocationRepo.GetByUserID(userID)
 }
 
 func NewRepository(
@@ -66,12 +68,14 @@ func NewRepository(
 	maxTimeAlert time.Duration,
 	alLocationRepo allocationrepo.Repository,
 	lcHistoryRepo lchistoryrepo.Repository,
+	alertService alertservice.Service,
 ) Repository {
 	return &repository{
 		maxDistanceAlert: maxDistanceAlert,
 		maxTimeAlert:     maxTimeAlert,
 		alLocationRepo:   alLocationRepo,
 		lcHistoryRepo:    lcHistoryRepo,
+		alertService:     alertService,
 	}
 }
 
@@ -94,10 +98,11 @@ func (r *repository) alert(timestamp time.Time, userID, alertToUserID uint,
 			latitude, longitude)
 		if distance <= r.maxDistanceAlert {
 			msg := fmt.Sprintf("Your child has arrived %s", alLocation.Name)
-			err = r.alertService.Alert("Child safe alert", msg, alertToUserID)
+			err = r.alertService.Alert("Child safe alert",
+				msg, alertToUserID)
 			if err != nil {
-				logrus.Errorf("failed to alert message: %s, error: %v", msg,
-					err)
+				logrus.Errorf("failed to alert message: %s, error: %v",
+					msg, err)
 				return err
 			}
 		}

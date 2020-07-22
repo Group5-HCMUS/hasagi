@@ -7,6 +7,7 @@ import (
 	"github.com/Group5-HCMUS/hasagi/pkg/middleware"
 	"github.com/Group5-HCMUS/hasagi/pkg/model"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cast"
 )
 
@@ -22,7 +23,9 @@ func NewService(repo Repository) *service {
 
 func (s *service) Register(g gin.IRouter) {
 	// child role
-	child := g.Use(middleware.Role(authservice.Child))
+	child := g.Use(
+		middleware.Role(authservice.Child),
+	)
 	child.POST("/location/history", s.postLocationHistory)
 
 	// parent role
@@ -34,8 +37,9 @@ func (s *service) Register(g gin.IRouter) {
 
 func (s *service) postLocationHistory(c *gin.Context) {
 	createLcHistoryReq := CreateLocationHistoryRequest{}
-	err := c.BindJSON(&createLcHistoryReq)
+	err := c.ShouldBind(&createLcHistoryReq)
 	if err != nil {
+		logrus.Error(err)
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.HttpResponse{
 			Message: "invalid data",
 		})
@@ -92,15 +96,27 @@ func (s *service) postAlertLocation(c *gin.Context) {
 }
 
 func (s *service) getListAlertLocation(c *gin.Context) {
-	//userID, err := getUserIDParam(c)
-	//if err != nil {
-	//	c.AbortWithStatusJSON(http.StatusBadRequest, model.HttpResponse{
-	//		Message: err.Error(),
-	//	})
-	//	return
-	//}
-	//
-	//s.repo.
+	userID, err := getUserIDParam(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.HttpResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	alertLocations, err := s.repo.GetListAlertLocation(userID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest,
+			model.HttpResponse{
+				Message: err.Error(),
+			})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.HttpResponse{
+		Message: "Get list alert location success",
+		Data:    alertLocations,
+	})
 }
 
 func getUserIDParam(c *gin.Context) (uint, error) {
