@@ -57,6 +57,10 @@ func (r *repository) CreateLocationHistoryAndAlert(alertToUserID uint,
 		lcHistory.Latitude, lcHistory.Longitude)
 }
 
+func (r *repository) getListAlertLocation(parentID, childID uint) ([]allocationrepo.AlertLocation, error) {
+	return nil, nil
+}
+
 func NewRepository(
 	maxDistanceAlert float64,
 	maxTimeAlert time.Duration,
@@ -90,7 +94,7 @@ func (r *repository) alert(timestamp time.Time, userID, alertToUserID uint,
 			latitude, longitude)
 		if distance <= r.maxDistanceAlert {
 			msg := fmt.Sprintf("Your child has arrived %s", alLocation.Name)
-			err = r.alertService.Alert(msg, alertToUserID)
+			err = r.alertService.Alert("Child safe alert", msg, alertToUserID)
 			if err != nil {
 				logrus.Errorf("failed to alert message: %s, error: %v", msg,
 					err)

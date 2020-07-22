@@ -26,6 +26,7 @@ Root: `https://hasagi1998.herokuapp.com/api/v1`
 ### Tạo alert location cho child
 
 Method: POST
+
 Path: `/location/alert`
 1. Header
 

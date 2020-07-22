@@ -9,7 +9,7 @@ dev:
     url: https://dacnpm-group05.herokuapp.com/api/client/v1/me
 
   alert:
-    url: hihi
+    url: https://dev-dacnpm-group05.herokuapp.com/api/v1/notify
     max_distance: 100
     max_time: 10 #minutes
 
@@ -22,6 +22,6 @@ pro:
     url: https://dacnpm-group05.herokuapp.com/api/client/v1/me
 
   alert:
-    url: hihi
+    url: https://dev-dacnpm-group05.herokuapp.com/api/v1/notify
     max_distance: 100
     max_time: 10 #minutes
